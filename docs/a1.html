@@ -4,15 +4,155 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
 
-    <title>Example Student's HCDE 439 Physical Computing Page!</title>
-
+    <title>Rebecca's A1: Blink!</title>
     <link href="style.css" rel="stylesheet" type="text/css" />
   </head>
+  
   <body>
-    <h1>Example Student's Assignment 1!</h1>
+    <h1>Assignment 1: Blink!</h1>
+    
     <div class="header">
       <img src="red-panda.jpg" />
-      <p>Here is all the documentation for assignment 1!</p>
+      <p>
+        For thsi assignment, I created a running-light pattern using 3 LEDs connected to an Arduino Uni.
+        The LEDs blink in sequence
+        LED1 -> LED 2 -> LED 3 -> LED2, 
+        with a 300ms delay between transitions.
+      </p>
     </div>
+    <h2>1. Circuit Schematic</h2>
+
+    <img src="schematic.png" width="700" />
+    <p>
+      Figure 1. Circuit schematic showing three LEDs connected
+      to digital pins D9, D10, and D11, each with a 220Ω resistor.
+    </p>
+
+    <h3>2. Resistor Calculation</h3>
+    <img src="resistor-calculation.jpeg" width="700" />
+    <p>
+      Figure 2.Calculation of the minimum resistance based on
+      the Arduino's 40mA per-pin limit, and verification that
+      a 220Ω resistor limits the estimated LED current to 13.6mA.
+    </p>
+
+    <h2>3. Circuit Photo</h2>
+
+    <img src="circuit.jpeg" width="700" />
+    <p>
+      Figure 3. My Arduino Uno circuit with three LEDs,
+      each connected to a separate digital pin through
+      a 220Ω resistor.
+    </p>
+
+    <h2>4. Firmware</h2>
+
+    <p>
+      The LEDs blink in a repeating sequence:
+      LED 1 → LED 2 → LED 3 → LED 2.
+    </p>
+
+    <pre><code>
+      
+/*
+  HCDE 439 - A1 Blink!
+  Holiday Running Lights
+*/
+
+// Assign digital pin 9 to LED 1.
+int led1 = 9;
+
+// Assign digital pin 10 to LED 2.
+int led2 = 10;
+
+// Assign digital pin 11 to LED 3.
+int led3 = 11;
+
+// Set each light's duration to 300 milliseconds.
+int blinkSpeed = 300;
+
+// Run this function once when Arduino starts.
+void setup() {
+  // Configure LED 1 as an output.
+  pinMode(led1, OUTPUT);
+
+  // Configure LED 2 as an output.
+  pinMode(led2, OUTPUT);
+
+  // Configure LED 3 as an output.
+  pinMode(led3, OUTPUT);
+}
+
+// Repeat the blinking pattern continuously.
+void loop() {
+  // Turn LED 1 on.
+  digitalWrite(led1, HIGH);
+
+  // Wait for 300 milliseconds.
+  delay(blinkSpeed);
+
+  // Turn LED 1 off.
+  digitalWrite(led1, LOW);
+
+  // Turn LED 2 on.
+  digitalWrite(led2, HIGH);
+
+  // Wait for 300 milliseconds.
+  delay(blinkSpeed);
+
+  // Turn LED 2 off.
+  digitalWrite(led2, LOW);
+
+  // Turn LED 3 on.
+  digitalWrite(led3, HIGH);
+
+  // Wait for 300 milliseconds.
+  delay(blinkSpeed);
+
+  // Turn LED 3 off.
+  digitalWrite(led3, LOW);
+
+  // Turn LED 2 on again.
+  digitalWrite(led2, HIGH);
+
+  // Wait for 300 milliseconds.
+  delay(blinkSpeed);
+
+  // Turn LED 2 off.
+  digitalWrite(led2, LOW);
+}
+    </code></pre>
+
+    <h2>5. Circuit Operation</h2>
+    <img src="blink.gif" width="700" />
+    <p>
+      Figure 4. Animated GIF showing the running-light
+      pattern with a 300ms delay.
+    </p>
+
+    <h2>6. Additional Questions</h2>
+
+    <h3>Q1. Voltage Across LEDs vs. Time</h3>
+
+    <img src="voltage-graph.png" width="700" />
+    <p>
+      Figure 5. Estimated voltage across the three LEDs
+      over time, assuming 2V when ON and 0V when OFF.
+    </p>
+
+    <h3>Q3. How fast until the blinking looks steady?</h3>
+
+    <p>
+      My original delay was 300ms, making the blinking
+      clearly visible. After reducing the delay to
+      [] ms, I could no longer
+      distinguish individual flashes.
+    </p>
+
+    <h3>Q4. Did you use AI tools?</h3>
+    Yes, I used ChatGPT during this assignment. At first, I was unsure whether to connect all three LEDs to pin 13 or use separate pins. ChatGPT suggested using three digital pins to control the LEDs independently.
+
+I also used AI to understand how to format and display my code in HTML, create and edit my A1 page on GitHub, and upload images. Since I was unfamiliar with documenting assignments through GitHub, these suggestions helped me complete the process.
+    
   </body>
 </html>
