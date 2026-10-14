@@ -14,7 +14,7 @@
     <div class="header">
       <img src="red-panda.jpg" />
       <p>
-        For thsi assignment, I created a running-light pattern using 3 LEDs connected to an Arduino Uni.
+        For thsi assignment, I created a running-light pattern using 3 LEDs connected to an Arduino Uno.
         The LEDs blink in sequence
         LED1 -> LED 2 -> LED 3 -> LED2, 
         with a 300ms delay between transitions.
@@ -140,17 +140,28 @@ void loop() {
       over time, assuming 2V when ON and 0V when OFF.
     </p>
 
+    <h3>Q2. How many LEDs could you blink independently with your Arduino? How much current would that draw?</h3>
+
+    <p>
+      The Arduino Uno has 14 digital pins, so it can theoretically control 14 LEDs independently. 
+      Each LED draws about 13.6mA, so 14 LEDs would draw approximately 190.4mA if all were on 
+      simultaneously. And it is still below 200mA. 
+    </p>
+
     <h3>Q3. How fast until the blinking looks steady?</h3>
 
     <p>
       My original delay was 300ms, making the blinking
       clearly visible. After reducing the delay to
-      [] ms, I could no longer
-      distinguish individual flashes.
+      5 ms, I could no longer distinguish individual flashes.
     </p>
 
     <h3>Q4. Did you use AI tools?</h3>
-    Yes, I used ChatGPT during this assignment. At first, I was unsure whether to connect all three LEDs to pin 13 or use separate pins. ChatGPT suggested using three digital pins to control the LEDs independently.
+    <p>
+      Yes, I used ChatGPT during this assignment. 
+      At first, I was unsure whether to connect all three LEDs to pin 13 or use separate pins. 
+      ChatGPT suggested using three digital pins to control the LEDs independently.
+    </p>
 
 I also used AI to understand how to format and display my code in HTML, create and edit my A1 page on GitHub, and upload images. Since I was unfamiliar with documenting assignments through GitHub, these suggestions helped me complete the process.
     
