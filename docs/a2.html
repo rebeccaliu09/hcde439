@@ -1,18 +1,564 @@
+
 <!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
 
-    <title>Example Student's HCDE 439 Physical Computing Page!</title>
+    <title>Rebecca Liu - Assignment 2: Fade!</title>
 
     <link href="style.css" rel="stylesheet" type="text/css" />
   </head>
+
   <body>
-    <h1>Example Student's Assignment 2!</h1>
+    <h1>Assignment 2: Fade!</h1>
+
     <div class="header">
-      <img src="red-panda.jpg" />
-      <p>Here is all the documentation for assignment 2!</p>
+      <p>
+        For this assignment, I created an interactive light-up toy
+        using an Arduino UNO, three LEDs, and a pushbutton.
+        When the button is pressed, the LEDs fade in one by one
+        and then fade out together.
+      </p>
     </div>
+
+    <h2>Requirements</h2>
+
+    <!-- 1. Schematic -->
+    <h3>1. Schematic</h3>
+
+    <img
+      src="a2_schematic.png"
+      alt="Circuit schematic for Assignment 2"
+      style="width: 100%; max-width: 800px;"
+    />
+
+    <p>
+      The schematic shows three LEDs connected to PWM pins
+      D9, D10, and D11, each with a 220Ω current-limiting
+      resistor. A pushbutton is connected to 5V and D2,
+      with an external 10kΩ pull-down resistor connecting
+      D2 to GND.
+    </p>
+
+    <!-- 2. Code -->
+    <h3>2. Code</h3>
+
+    <p>
+      My code uses digitalRead() to detect the button state,
+      analogWrite() to control LED brightness, and digitalWrite()
+      to turn the LEDs off. I also used for loops to make the
+      three LEDs fade in sequentially and then fade out together.
+    </p>
+
+    <pre><code>
+// Define the digital input pin for the button.
+const int buttonPin = 2;
+
+// Store the PWM pins connected to the three LEDs.
+const int ledPins[] = {9, 10, 11};
+
+// Define the total number of LEDs.
+const int numLeds = 3;
+
+// Run setup once when the Arduino starts.
+void setup() {
+
+  // Set the button pin as input using an external pull-down resistor.
+  pinMode(buttonPin, INPUT);
+
+  // Loop through all LED pins.
+  for (int i = 0; i &lt; numLeds; i++) {
+
+    // Configure each LED pin as an output.
+    pinMode(ledPins[i], OUTPUT);
+  }
+}
+
+// Repeat the light interaction continuously.
+void loop() {
+
+  // Read the current button state.
+  int buttonState = digitalRead(buttonPin);
+
+  // Start the animation when the button is pressed (HIGH).
+  if (buttonState == HIGH) {
+
+    // Fade in the LEDs one by one.
+    for (int i = 0; i &lt; numLeds; i++) {
+
+      // Gradually increase the brightness from 0 to 255.
+      for (int brightness = 0; brightness &lt;= 255; brightness += 5) {
+
+        // Set the brightness of the current LED using PWM.
+        analogWrite(ledPins[i], brightness);
+
+        // Wait 10 milliseconds to make the fade visible.
+        delay(10);
+      }
+    }
+
+    // Gradually fade out all LEDs together.
+    for (int brightness = 255; brightness &gt;= 0; brightness -= 5) {
+
+      // Loop through all three LEDs.
+      for (int i = 0; i &lt; numLeds; i++) {
+
+        // Set the same brightness for each LED.
+        analogWrite(ledPins[i], brightness);
+      }
+
+      // Wait 10 milliseconds before the next brightness level.
+      delay(10);
+    }
+
+  // Run this section when the button is not pressed.
+  } else {
+
+    // Loop through all three LEDs.
+    for (int i = 0; i &lt; numLeds; i++) {
+
+      // Turn off the current LED.
+      digitalWrite(ledPins[i], LOW);
+    }
+  }
+}
+    </code></pre>
+
+    <!-- 3. Circuit -->
+    <h3>3. Circuit</h3>
+
+    <img
+      src="a2_circuit.jpg"
+      alt="Arduino circuit with three LEDs and a pushbutton"
+      style="width: 100%; max-width: 800px;"
+    />
+
+    <p>
+      I built the circuit using an Arduino UNO, a breadboard,
+      three LEDs, a pushbutton, and resistors. Each LED is
+      controlled independently through a PWM pin. Pressing
+      the button triggers the fading animation.
+    </p>
+
+    <!-- 4. LED Resistor Calculation -->
+    <h3>
+      4. You must limit the current flowing through the LEDs
+      using resistors. You should calculate an appropriate
+      resistance to use. Show your calculation.
+    </h3>
+
+    <p>
+      I used three LEDs (green, yellow, and red), each connected
+      to a separate PWM pin with its own 220Ω current-limiting
+      resistor.
+    </p>
+
+    <p>
+      To determine an appropriate resistor value, I initially
+      assumed a 5V supply voltage, an LED forward voltage of
+      approximately 2V, and a rated operating current of 20mA.
+    </p>
+
+    <p>Using Ohm's Law:</p>
+
+    <pre>
+R = (V_supply - V_f) / I
+
+R = (5V - 2V) / 0.020A
+
+R = 150Ω
+    </pre>
+
+    <p>
+      Based on these assumptions, a resistance of approximately
+      150Ω would produce 20mA. I chose a higher resistance of
+      220Ω to further limit the current.
+    </p>
+
+    <p>Using the same theoretical forward voltage:</p>
+
+    <pre>
+I = (5V - 2V) / 220Ω
+
+I = 3V / 220Ω
+
+I ≈ 0.01364A
+
+I ≈ 13.64mA
+    </pre>
+
+    <p>
+      This estimated current is below the assumed 20mA operating
+      current while still allowing the LED to illuminate.
+    </p>
+
+    <!-- 5. Button Resistor Calculation -->
+    <h3>
+      5. You must limit the current flowing through the button.
+      Explain why you used the value you did.
+    </h3>
+
+    <p>
+      I used a 10kΩ external pull-down resistor for my pushbutton
+      circuit to limit the current and maintain a stable digital input.
+    </p>
+
+    <p>
+      When the button is pressed, current flows from the Arduino's
+      5V supply through the button and the resistor to GND.
+    </p>
+
+    <p>Using Ohm's Law:</p>
+
+    <pre>
+I = V / R
+
+I = 5V / 10,000Ω
+
+I = 0.0005A
+
+I = 0.5mA
+    </pre>
+
+    <p>
+      The resistor limits the current to 0.5mA when the button
+      is pressed and keeps the D2 input LOW when the button
+      is released.
+    </p>
+
+    <p>
+      In Lecture 4, we discussed the Arduino's 40mA maximum
+      current rating per I/O pin. The TA also explained that
+      operating close to this limit is not recommended and
+      that the current should be kept small.
+    </p>
+
+    <p>
+      I chose a 10kΩ resistor because 0.5mA is a very small
+      current and the circuit can still detect the button
+      state reliably. The resistor also prevents the digital
+      input from floating.
+    </p>
+
+    <p>
+      I also confirmed with the course TA that a 10kΩ resistor
+      and a calculated current of 0.5mA were appropriate for
+      this assignment.
+    </p>
+
+    <!-- 6. Video -->
+    <h3>6. Video</h3>
+
+    <video
+      width="700"
+      controls
+      autoplay
+      muted
+      loop
+      playsinline
+      style="max-width: 100%;"
+    >
+      <source src="a2_demo.mp4" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+
+    <p>
+      When the button is pressed, the green, yellow, and red
+      LEDs fade in one by one. After all three LEDs reach
+      full brightness, they fade out together. The sequence
+      repeats while the button remains pressed.
+    </p>
+
+    <hr />
+
+    <h2>Additional Questions</h2>
+
+    <!-- Question 1 -->
+    <h3>
+      1. Draw a chart where the X axis is time and the Y axis
+      is voltage. Draw 3 lines representing the voltage across
+      an LED with analogWrite(led, 64), analogWrite(led, 128),
+      and analogWrite(led, 255).
+    </h3>
+
+    <p>
+      Pulse-width modulation (PWM) controls LED brightness by
+      rapidly switching the output between HIGH and LOW.
+      I used an assumed LED forward voltage of 2V to illustrate
+      the voltage across an LED during its ON state.
+    </p>
+
+    <p>
+      The chart below shows three idealized waveforms over time.
+      The horizontal axis represents time, and the vertical
+      axis represents the voltage across the LED.
+    </p>
+
+    <!-- PWM Waveform Chart -->
+    <svg
+      viewBox="0 0 700 400"
+      xmlns="http://www.w3.org/2000/svg"
+      role="img"
+      aria-label="PWM waveform chart for analogWrite 64, 128, and 255"
+      style="width: 100%; max-width: 800px; background: white;"
+    >
+      <!-- Chart title -->
+      <text x="350" y="25" text-anchor="middle"
+            font-size="18" font-weight="bold" fill="#222">
+        Voltage Across an LED vs. Time
+      </text>
+
+      <!-- Axes -->
+      <line x1="105" y1="65" x2="105" y2="345"
+            stroke="#333" stroke-width="2" />
+      <line x1="105" y1="345" x2="650" y2="345"
+            stroke="#333" stroke-width="2" />
+
+      <!-- Axis labels -->
+      <text x="375" y="385" text-anchor="middle"
+            font-size="15" fill="#222">
+        Time
+      </text>
+      <text x="24" y="205" text-anchor="middle"
+            transform="rotate(-90 24 205)"
+            font-size="15" fill="#222">
+        Voltage Across LED
+      </text>
+
+      <!-- Waveform 1 labels -->
+      <text x="110" y="57" font-size="14" fill="#333">
+        analogWrite(64) - 25% duty cycle
+      </text>
+      <text x="70" y="82" font-size="12" fill="#333">2V</text>
+      <text x="70" y="125" font-size="12" fill="#333">0V</text>
+
+      <!-- 25% duty cycle, repeated across two periods -->
+      <path
+        d="M110 120 V80 H175 V120 H370
+           V80 H435 V120 H630"
+        fill="none"
+        stroke="#e76f51"
+        stroke-width="3"
+      />
+
+      <!-- Waveform 2 labels -->
+      <text x="110" y="157" font-size="14" fill="#333">
+        analogWrite(128) - 50% duty cycle
+      </text>
+      <text x="70" y="182" font-size="12" fill="#333">2V</text>
+      <text x="70" y="225" font-size="12" fill="#333">0V</text>
+
+      <!-- 50% duty cycle, repeated across two periods -->
+      <path
+        d="M110 220 V180 H240 V220 H370
+           V180 H500 V220 H630"
+        fill="none"
+        stroke="#2a9d8f"
+        stroke-width="3"
+      />
+
+      <!-- Waveform 3 labels -->
+      <text x="110" y="257" font-size="14" fill="#333">
+        analogWrite(255) - 100% duty cycle
+      </text>
+      <text x="70" y="282" font-size="12" fill="#333">2V</text>
+      <text x="70" y="325" font-size="12" fill="#333">0V</text>
+
+      <!-- 100% duty cycle: LED stays on -->
+      <path
+        d="M110 320 V280 H630"
+        fill="none"
+        stroke="#457b9d"
+        stroke-width="3"
+      />
+
+      <!-- Time direction -->
+      <text x="635" y="365" font-size="18" fill="#333">
+        →
+      </text>
+    </svg>
+
+    <p>
+      analogWrite(64) produces approximately a 25% duty cycle,
+      analogWrite(128) produces approximately a 50% duty cycle,
+      and analogWrite(255) produces a 100% duty cycle.
+    </p>
+
+    <p>
+      A higher duty cycle means the LED stays on for a longer
+      portion of each cycle, making it appear brighter.
+      The voltage across an LED during its ON state is
+      approximately its forward voltage rather than the
+      full 5V Arduino output.
+    </p>
+
+    <!-- Question 2 -->
+    <h3>
+      2. If all your LEDs were on simultaneously, what would
+      the total current draw be? Is this above or below the
+      total Arduino current draw limits? If all your LEDs
+      were on, how long would your circuit run if powered
+      by a 1200 mAh battery?
+    </h3>
+
+    <p>
+      Based on my theoretical calculation, each LED draws
+      approximately 13.64mA when fully illuminated.
+    </p>
+
+    <p>If all three LEDs are on simultaneously:</p>
+
+    <pre>
+I_LEDs = 3 x 13.64mA
+
+I_LEDs = 40.91mA
+    </pre>
+
+    <p>
+      Each LED is connected to a separate Arduino output
+      pin, so the current through each pin is approximately
+      13.64mA, which is below the 40mA per-pin maximum
+      discussed in class.
+    </p>
+
+    <p>
+      The combined LED current of 40.91mA is also below
+      the total 150mA output-current limit discussed in class.
+    </p>
+
+    <p>Assuming a 1200mAh battery and considering only the LEDs:</p>
+
+    <pre>
+Battery Life = Battery Capacity / Current Draw
+
+Battery Life = 1200mAh / 40.91mA
+
+Battery Life ≈ 29.3 hours
+    </pre>
+
+    <p>
+      However, when the button is continuously pressed,
+      current also flows through the 10kΩ pull-down resistor.
+    </p>
+
+    <p>The button current is:</p>
+
+    <pre>
+I_button = 5V / 10,000Ω
+
+I_button = 0.5mA
+    </pre>
+
+    <p>
+      Therefore, the total estimated current for the external
+      LED and button circuits is:
+    </p>
+
+    <pre>
+I_external = I_LEDs + I_button
+
+I_external = 40.91mA + 0.5mA
+
+I_external = 41.41mA
+    </pre>
+
+    <p>Including the button current:</p>
+
+    <pre>
+Battery Life = 1200mAh / 41.41mA
+
+Battery Life ≈ 29.0 hours
+    </pre>
+
+    <p>
+      These are theoretical estimates assuming that all LEDs
+      are continuously on at full brightness. They do not
+      include the Arduino UNO's own power consumption,
+      regulator losses, or battery limitations. Therefore,
+      the actual battery life would be different.
+    </p>
+
+    <!-- Question 3 -->
+    <h3>
+      3. Measure and record the actual voltage across one
+      of your LEDs when it's on. How does this compare to
+      the theoretical forward voltage for your LED color?
+    </h3>
+
+    <p>
+      I measured the forward voltage across all three LEDs
+      using a digital multimeter while they were fully
+      illuminated.
+    </p>
+
+    <table border="1" cellpadding="10" cellspacing="0">
+      <thead>
+        <tr>
+          <th>LED</th>
+          <th>Measured Forward Voltage</th>
+          <th>Estimated Current</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr>
+          <td>Green (D9)</td>
+          <td>2.75V</td>
+          <td>(5 - 2.75) / 220 = 10.23mA</td>
+        </tr>
+
+        <tr>
+          <td>Yellow (D10)</td>
+          <td>2.01V</td>
+          <td>(5 - 2.01) / 220 = 13.59mA</td>
+        </tr>
+
+        <tr>
+          <td>Red (D11)</td>
+          <td>1.95V</td>
+          <td>(5 - 1.95) / 220 = 13.86mA</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>
+      For my initial calculation, I assumed a theoretical
+      forward voltage of approximately 2V.
+    </p>
+
+    <p>
+      The red LED's measured forward voltage was 1.95V,
+      which is very close to this assumption, with a
+      difference of only 0.05V. The yellow LED also
+      measured close to 2V, while the green LED had a
+      higher forward voltage of 2.75V.
+    </p>
+
+    <p>
+      These differences show that the forward voltage
+      varies depending on the LED color and component
+      characteristics.
+    </p>
+
+    <!-- Question 4 -->
+    <h3>
+      4. Did you use AI tools in completing this assignment?
+      If yes, please provide details on how/when, as well
+      as a brief reflection.
+    </h3>
+
+    <p>
+Yes, I used ChatGPT as a learning and formatting tool during this assignment.
+
+While writing my original Arduino code, I had some difficulties understanding and structuring the nested `for` loops for the LED fading sequence. 
+      I used AI to help me break down the logic, identify issues, and better understand how the loops worked.
+
+I also used AI to help format my handwritten resistor calculations into a clearer structure for the documentation.
+
+Overall, AI was helpful for clarifying programming concepts and improving the presentation of my work. 
+      I still built and tested the circuit myself and verified that the code worked as intended.
+    </p>
+
   </body>
 </html>
