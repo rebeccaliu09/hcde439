@@ -393,67 +393,53 @@ Battery Life ≈ 29.0 hours
       the actual battery life would be different.
     </p>
 
-    <!-- Question 3 -->
-    <h3>
-      3. Measure and record the actual voltage across one
-      of your LEDs when it's on. How does this compare to
-      the theoretical forward voltage for your LED color?
-    </h3>
 
-    <p>
-      I measured the forward voltage across all three LEDs
-      using a digital multimeter while they were fully
-      illuminated.
-    </p>
+<!-- Question 3 -->
+<h3>
+  3. Measure and record the actual voltage across one
+  of your LEDs when it's on. How does this compare to
+  the theoretical forward voltage for your LED color?
+</h3>
 
-    <table border="1" cellpadding="10" cellspacing="0">
-      <thead>
-        <tr>
-          <th>LED</th>
-          <th>Measured Forward Voltage</th>
-          <th>Estimated Current</th>
-        </tr>
-      </thead>
+<p>
+  I measured the forward voltage across all three LEDs
+  using a digital multimeter while they were fully illuminated.
+</p>
 
-      <tbody>
-        <tr>
-          <td>Green (D9)</td>
-          <td>2.75V</td>
-          <td>(5 - 2.75) / 220 = 10.23mA</td>
-        </tr>
+<table border="1" cellpadding="10" cellspacing="0">
+  <thead>
+    <tr>
+      <th>LED</th>
+      <th>Measured Forward Voltage</th>
+    </tr>
+  </thead>
 
-        <tr>
-          <td>Yellow (D10)</td>
-          <td>2.01V</td>
-          <td>(5 - 2.01) / 220 = 13.59mA</td>
-        </tr>
+  <tbody>
+    <tr>
+      <td>Green (D9)</td>
+      <td>2.75V</td>
+    </tr>
+    <tr>
+      <td>Yellow (D10)</td>
+      <td>2.01V</td>
+    </tr>
+    <tr>
+      <td>Red (D11)</td>
+      <td>1.95V</td>
+    </tr>
+  </tbody>
+</table>
 
-        <tr>
-          <td>Red (D11)</td>
-          <td>1.95V</td>
-          <td>(5 - 1.95) / 220 = 13.86mA</td>
-        </tr>
-      </tbody>
-    </table>
+<p>
+  The red LED's measured forward voltage was 1.95V,
+  which is very close to the theoretical value of
+  approximately 2V used in my initial calculation.
+  The yellow LED also measured close to 2V, while
+  the green LED had a higher forward voltage of 2.75V.
+  These differences are expected because forward
+  voltage varies depending on LED color.
+</p>
 
-    <p>
-      For my initial calculation, I assumed a theoretical
-      forward voltage of approximately 2V.
-    </p>
-
-    <p>
-      The red LED's measured forward voltage was 1.95V,
-      which is very close to this assumption, with a
-      difference of only 0.05V. The yellow LED also
-      measured close to 2V, while the green LED had a
-      higher forward voltage of 2.75V.
-    </p>
-
-    <p>
-      These differences show that the forward voltage
-      varies depending on the LED color and component
-      characteristics.
-    </p>
 
     <!-- Question 4 -->
     <h3>
