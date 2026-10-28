@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+
+  <title>Rebecca Liu - Assignment 3: Input Output!</title>
+
+  <link href="style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+
+  <h1>Assignment 3: Input Output!</h1>
+
+  <div class="header">
+    <p>
+      For this assignment, I built a smart blinds prototype
+      using an Arduino UNO, a photoresistor, a servo motor,
+      and a yellow LED. The photoresistor senses changes in
+      ambient light. Based on the sensor reading, the servo
+      moves between two positions to represent opening or
+      closing the blinds, while the LED changes brightness.
+    </p>
+
+    <p>
+      <strong>Collaborators:</strong> None
+    </p>
+  </div>
+
+  <h2>Requirements</h2>
+
+  <!-- 1. Schematic -->
+  <h3>1. Schematic</h3>
+
+  <img
+    src="a3_schematic.jpg"
+    alt="Hand-drawn schematic of the smart blinds circuit"
+    style="width: 100%; max-width: 800px;"
+  />
+
+  <p>
+    The photoresistor and a fixed 10k&Omega; resistor form
+    a voltage divider. The photoresistor connects to 5V,
+    the fixed resistor connects to GND, and the point
+    between them connects to analog input A0.
+  </p>
+
+  <p>
+    The servo signal connects to D9, with power from 5V
+    and GND. The yellow LED connects to PWM pin D5 through
+    a 220&Omega; current-limiting resistor, then to GND.
+    All components share a common ground.
+  </p>
+
+
+  <!-- 2. Code -->
+  <h3>2. Code</h3>
+
+  <p>
+    My code uses analogRead() to read the light level from
+    the photoresistor through pin A0. I used map() to convert
+    sensor readings between 350 and 550 into LED brightness
+    values from 0 to 255, and analogWrite() to control the
+    LED on pin D5.
+  </p>
+
+  <p>
+    I also used an if statement to control the servo motor.
+    When the sensor reading is greater than 500, the servo
+    moves to 90 degrees to simulate closing the blinds.
+    Otherwise, it moves to 0 degrees to simulate opening them.
+  </p>
+
+  <p>
+    I used a narrower mapping range to make the LED brightness
+    changes easier to see. The constrain() function keeps
+    the LED brightness value between 0 and 255.
+  </p>
+
+  <pre><code>
+#include &lt;Servo.h&gt;
+
+Servo myServo;
+
+// Pins for the light sensor, servo, and LED
+const int lightPin = A0;
+const int servoPin = 9;
+const int ledPin = 5;
+
+void setup() {
+  myServo.attach(servoPin);
+  pinMode(ledPin, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  // Read the light level from the photoresistor
+  int brightness = analogRead(lightPin);
+
+  // Convert the light reading to an LED brightness value
+  // Use 350-550 based on the range I observed during testing
+  int ledBrightness = map(brightness, 350, 550, 0, 255);
+  ledBrightness = constrain(ledBrightness, 0, 255);
+
+  // Adjust the LED brightness based on the light level
+  analogWrite(ledPin, ledBrightness);
+
+  // Close the blinds when it is bright, open them when it is dark
+  if (brightness &gt; 500) {
+    myServo.write(90);
+  } else {
+    myServo.write(0);
+  }
+
+  // Print the readings so I can check them in Serial Monitor
+  Serial.print("Light: ");
+  Serial.print(brightness);
+  Serial.print(" LED: ");
+  Serial.println(ledBrightness);
+
+  delay(300);
+}
+  </code></pre>
+
+
+  <!-- 3. Circuit -->
+  <h3>3. Circuit</h3>
+
+  <img
+    src="a3_circuit.jpg"
+    alt="Built circuit with Arduino, photoresistor, servo, and LED"
+    style="width: 100%; max-width: 800px;"
+  />
+
+  <p>
+    I assembled the circuit using an Arduino UNO,
+    a breadboard, a photoresistor, a 10k&Omega; resistor,
+    a servo motor, a yellow LED, and a 220&Omega; resistor.
+    The photoresistor is the input sensor, while the servo
+    and LED are the outputs.
+  </p>
+
+  <p>
+    I tested the components separately before combining
+    them into one circuit. During testing, the LED worked
+    on its own but stopped responding properly to PWM
+    when I added the Servo library.
+  </p>
+
+  <p>
+    I learned that the Servo library uses Timer1 on the
+    Arduino UNO, which affects PWM on pins D9 and D10.
+    I moved the LED from D10 to D5, and both outputs
+    were then able to work together.
+  </p>
+
+
+  <!-- 4. Resistor Values and Calculations -->
+  <h3>4. Resistor Values and Calculations</h3>
+
+  <h4>Photoresistor Voltage Divider (10k&Omega;)</h4>
+
+  <p>
+    I used a 10k&Omega; resistor with the photoresistor
+    to form a voltage divider. Since the Arduino reads
+    voltage rather than resistance directly, the fixed
+    resistor allows changes in the photoresistor's
+    resistance to be measured as changes in voltage.
+  </p>
+
+  <p>
+    I chose 10k&Omega; because it is a common value for
+    photoresistor voltage dividers and provides a useful
+    voltage range while keeping the current low.
+  </p>
+
+  <p>
+    For example, if the photoresistor also has a
+    resistance of 10k&Omega;, the output voltage is:
+  </p>
+
+  <pre>
+Vout = Vin × R2 / (R1 + R2)
+
+Vout = 5 × 10 / (10 + 10)
+
+Vout = 2.5V
+  </pre>
+
+  <p>
+    The current through the voltage divider would be:
+  </p>
+
+  <pre>
+I = V / (R1 + R2)
+
+I = 5V / 20,000Ω
+
+I = 0.00025A
+
+I = 0.25mA
+  </pre>
+
+  <p>
+    These calculations use an assumed photoresistor
+    resistance. During testing, I measured output
+    voltages ranging from approximately 0.6V to
+    3.0V as the light level changed.
+  </p>
+
+
+  <h4>LED Current-Limiting Resistor (220&Omega;)</h4>
+
+  <p>
+    I used a 220&Omega; resistor to limit the current
+    flowing through the yellow LED. I assumed a 5V
+    Arduino output, an LED forward voltage of
+    approximately 2V, and a target current of 20mA.
+  </p>
+
+  <p>
+    Using Ohm's Law:
+  </p>
+
+  <pre>
+R = (V_supply - V_f) / I
+
+R = (5V - 2V) / 0.020A
+
+R = 3V / 0.020A
+
+R = 150Ω
+  </pre>
+
+  <p>
+    Based on this calculation, a 150&Omega; resistor
+    would allow approximately 20mA. I chose a higher
+    resistance of 220&Omega; to further limit the
+    current while still allowing the LED to light up.
+  </p>
+
+  <pre>
+I = (V_supply - V_f) / R
+
+I = (5V - 2V) / 220Ω
+
+I = 3V / 220Ω
+
+I ≈ 0.01364A
+
+I ≈ 13.64mA
+  </pre>
+
+  <p>
+    The estimated current is approximately 13.64mA,
+    below the assumed 20mA operating current.
+    This is the theoretical full-on current.
+    When PWM is used to dim the LED, its average
+    current is lower at smaller duty cycles.
+  </p>
+
+
+  <!-- 5. Video -->
+  <h3>5. Video</h3>
+
+  <video
+    width="700"
+    controls
+    autoplay
+    muted
+    loop
+    playsinline
+    style="max-width: 100%;"
+  >
+    <source src="a3_demo.MOV" type="video/quicktime" />
+    Your browser does not support the video tag.
+  </video>
+
+  <p>
+    In the video, I demonstrate how the circuit responds
+    to changes in light. I cover the photoresistor to
+    reduce the amount of light reaching it, then uncover
+    it to increase the light level again.
+  </p>
+
+  <p>
+    As the light level changes, the servo moves between
+    two positions to simulate opening and closing the
+    blinds. The LED brightness also changes based on
+    the sensor reading.
+  </p>
+
+
+  <hr />
+
+  <h2>Additional Questions</h2>
+
+
+  <!-- Question 1 -->
+  <h3>
+    1. Can the variable resistor be R1 or R2?
+    Justify your answer with example calculations.
+  </h3>
+
+  <p>
+    Yes, the photoresistor can be used as either R1
+    or R2 in a voltage divider. Both arrangements
+    work, but they produce opposite relationships
+    between light and output voltage.
+  </p>
+
+  <p>
+    The voltage divider equation is:
+  </p>
+
+  <pre>
+Vout = Vin × R2 / (R1 + R2)
+  </pre>
+
+
+  <h4>Case 1: Photoresistor as R1</h4>
+
+  <p>
+    In my current circuit, the photoresistor is R1
+    and the fixed 10k&Omega; resistor is R2.
+  </p>
+
+  <p>
+    In dim light, assuming the photoresistor has
+    a resistance of 40k&Omega;:
+  </p>
+
+  <pre>
+Vin = 5V
+R1 = 40kΩ
+R2 = 10kΩ
+
+Vout = 5 × 10 / (40 + 10)
+
+Vout = 1.0V
+  </pre>
+
+  <p>
+    In bright light, assuming the photoresistor
+    resistance decreases to 2k&Omega;:
+  </p>
+
+  <pre>
+Vin = 5V
+R1 = 2kΩ
+R2 = 10kΩ
+
+Vout = 5 × 10 / (2 + 10)
+
+Vout ≈ 4.17V
+  </pre>
+
+  <p>
+    When the photoresistor is R1, more light
+    decreases its resistance and increases
+    the output voltage.
+  </p>
+
+
+  <h4>Case 2: Photoresistor as R2</h4>
+
+  <p>
+    If I switch their positions, the fixed
+    10k&Omega; resistor becomes R1 and the
+    photoresistor becomes R2.
+  </p>
+
+  <p>
+    In dim light:
+  </p>
+
+  <pre>
+Vin = 5V
+R1 = 10kΩ
+R2 = 40kΩ
+
+Vout = 5 × 40 / (10 + 40)
+
+Vout = 4.0V
+  </pre>
+
+  <p>
+    In bright light:
+  </p>
+
+  <pre>
+Vin = 5V
+R1 = 10kΩ
+R2 = 2kΩ
+
+Vout = 5 × 2 / (10 + 2)
+
+Vout ≈ 0.83V
+  </pre>
+
+  <p>
+    When the photoresistor is R2, more light
+    decreases the output voltage instead.
+  </p>
+
+  <p>
+    Both configurations can create the same
+    smart blinds behavior if I reverse the
+    mapping and adjust the servo condition
+    in my Arduino code.
+  </p>
+
+  <p>
+    The 40k&Omega; and 2k&Omega; photoresistor
+    values are hypothetical examples rather
+    than measured resistance values.
+  </p>
+
+
+  <!-- Question 2 -->
+  <h3>
+    2. Graph time (x-axis) versus voltage (y-axis),
+    plotting the measured voltage at the voltage
+    divider during the video recording.
+  </h3>
+
+  <p>
+    I measured the voltage at the output of the
+    photoresistor voltage divider using a digital
+    multimeter while changing the amount of
+    light reaching the sensor.
+  </p>
+
+  <p>
+    Under normal lighting, I observed voltages
+    between approximately 2.97V and 3.08V.
+    When I covered the photoresistor, the voltage
+    dropped almost immediately to around 0.64V.
+  </p>
+
+  <p>
+    The change happened so quickly that it was
+    difficult to capture intermediate readings
+    using the multimeter.
+  </p>
+
+  <p>
+    The graph below shows the voltage change
+    over time, using the readings that could
+    be observed during the experiment.
+  </p>
+
+  <img
+    src="a3_voltage_graph.jpg"
+    alt="Measured voltage versus time at the voltage divider"
+    style="width: 100%; max-width: 1000px;"
+  />
+
+
+  <!-- Question 3 -->
+  <h3>
+    3. If you had 10-bit PWM and a 16-bit ADC
+    instead of 8-bit PWM and a 10-bit ADC,
+    how would your map() function change?
+    Explain.
+  </h3>
+
+  <p>
+    The Arduino UNO uses a 10-bit ADC, which gives
+    readings from 0 to 1023, and 8-bit PWM,
+    which uses values from 0 to 255.
+  </p>
+
+  <p>
+    If I had a 16-bit ADC, the input range
+    would increase to 0–65535. With 10-bit PWM,
+    the output range would increase to 0–1023.
+  </p>
+
+  <p>
+    For a full-range mapping, the original
+    function would be:
+  </p>
+
+  <pre>
+map(sensorValue, 0, 1023, 0, 255);
+  </pre>
+
+  <p>
+    The new function would be:
+  </p>
+
+  <pre>
+map(sensorValue, 0, 65535, 0, 1023);
+  </pre>
+
+  <p>
+    Since my actual code uses an input range
+    of 350–550, I would also need to scale
+    these values to the 16-bit ADC range to
+    preserve approximately the same voltage
+    thresholds.
+  </p>
+
+  <pre>
+350 × 65535 / 1023 ≈ 22422
+
+550 × 65535 / 1023 ≈ 35234
+  </pre>
+
+  <p>
+    The new mapping for my specific program
+    would be approximately:
+  </p>
+
+  <pre>
+map(brightness, 22422, 35234, 0, 1023);
+  </pre>
+
+  <p>
+    I would also constrain the output between
+    0 and 1023 instead of 0 and 255.
+  </p>
+
+  <p>
+    The higher ADC resolution would allow
+    smaller changes in the input voltage
+    to be represented, while higher PWM
+    resolution would provide more possible
+    brightness levels.
+  </p>
+
+
+  <!-- Question 4 -->
+  <h3>
+    4. Did you use AI tools in completing
+    this assignment? If yes, please provide
+    details on how/when, as well as a brief
+    reflection.
+  </h3>
+
+  <p>
+    Yes, I used ChatGPT to help me understand
+    and troubleshoot parts of my Arduino code.
+  </p>
+
+  <p>
+    When I first tested my circuit, I noticed
+    that the LED brightness barely changed
+    when I covered the photoresistor.
+    I asked ChatGPT why this was happening,
+    and it helped me understand how the map()
+    function affects LED brightness.
+  </p>
+
+  <p>
+    Initially, I was mapping a much larger
+    input range (0–1023) to a smaller output
+    range (80–255). ChatGPT suggested narrowing
+    the input range to 350–550 and mapping
+    it to 0–255, so that changes in the light
+    sensor reading would produce a more
+    noticeable change in LED brightness.
+  </p>
+
+  <p>
+    I also used ChatGPT to help me understand
+    the voltage divider. At first, I thought
+    that a lower voltage from the photoresistor
+    would directly make the LED dimmer.
+    Through our discussion, I learned that
+    the voltage divider provides an input
+    to the Arduino, while the LED output
+    is controlled separately through the code.
+  </p>
+
+  <p>
+    ChatGPT also helped me generate and debug
+    parts of the Arduino code, including
+    resolving a PWM pin conflict between the
+    servo and LED, and to organize my
+    calculations and HTML documentation.
+  </p>
+
+  <p>
+    I built and tested the circuit myself
+    and measured the voltage using a multimeter.
+    Overall, AI helped me better understand
+    how sensor readings are translated into
+    output behavior.
+  </p>
+
+</body>
+</html>
