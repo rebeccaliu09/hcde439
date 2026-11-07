@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rebecca Liu | HCDE 439 A4: Libraries!</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .a4-page {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 24px 20px 48px;
+      line-height: 1.55;
+    }
+    .a4-page section { margin-top: 32px; }
+    .a4-page figure { margin: 16px 0; }
+    .a4-page figure img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+    }
+    .a4-page figcaption { margin-top: 8px; }
+    .a4-page pre {
+      overflow-x: auto;
+      padding: 16px;
+      background: #f2f5f7;
+      color: #182530;
+    }
+  </style>
+</head>
+<body>
+  <main class="a4-page">
+    <nav aria-label="Course navigation">
+      <a href="index.html">HCDE 439 Home</a>
+    </nav>
+
+    <h1>Assignment 4: Libraries!</h1>
+    <p>Rebecca Liu</p>
+    <h2>Capacitive Touch-Controlled Servo</h2>
+    <p>
+      I used a coin as a capacitive touch input. When I touch the coin,
+      the servo moves to 90°. When I release it, the servo returns to 0°.
+      The sketch uses the <code>CapacitiveSensor</code> library to detect
+      touch and the <code>Servo</code> library to control the servo.
+    </p>
+
+    <section>
+      <h2>Schematic</h2>
+      <figure>
+        <img src="a4_touch_servo_schematic.png"
+             alt="Schematic showing a 1 megohm resistor between Pins 2 and 4, a coin connected to Pin 4, and a servo connected to Pin 9, 5 V, and ground.">
+        <figcaption>
+          A 1 MΩ resistor connects the send pin (Pin 2) to the receive pin
+          (Pin 4). The high resistance slows the voltage change at the
+          receive pin so the library can detect a difference in timing
+          when I touch the coin. The coin connects to the same junction
+          as Pin 4 and one end of the resistor. The servo signal connects
+          to Pin 9, with power from 5 V and ground from GND.
+        </figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>Physical Circuit</h2>
+      <figure>
+        <img src="a4_circuit.jpg"
+             alt="Photo of the Arduino, breadboard, coin, and servo.">
+        <figcaption>
+          The servo's yellow wire connects to Pin 9, the red wire connects
+          to 5 V, and the black wire connects to GND. The coin wire shares
+          a breadboard connection with Pin 4 and one end of the resistor.
+        </figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>Circuit Operation</h2>
+      <figure>
+        <img src="a4_demo.gif"
+             alt="The servo turns when the coin is touched and returns when released.">
+        <figcaption>
+          Touching the coin moves the servo to 90°. Releasing the coin
+          returns the servo to 0°.
+        </figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>Arduino Code</h2>
+      <p>
+        The sketch combines 30 sensing cycles into each reading and waits
+        50 ms between readings to keep the serial output readable while
+        still responding quickly to touch. I chose 0° and 90° because a
+        quarter turn is easy to see in the demo. The threshold of 100 is
+        a starting value that should fall between the untouched and
+        touched readings in the Serial Monitor.
+      </p>
+
+      <pre><code>// Load the library for capacitive touch sensing.
+#include &lt;CapacitiveSensor.h&gt;
+
+// Load the library for controlling the servo.
+#include &lt;Servo.h&gt;
+
+// Use Pin 2 to send and Pin 4 to receive the sensing signal.
+CapacitiveSensor touchSensor(2, 4);
+
+// Create an object to control the servo.
+Servo myServo;
+
+// Set a starting threshold for detecting touch.
+const long touchThreshold = 100;
+
+// Set up the serial connection and servo when the Arduino starts.
+void setup() {
+  // Match the Serial Monitor's baud rate.
+  Serial.begin(9600);
+
+  // Send the servo control signal through Pin 9.
+  myServo.attach(9);
+
+  // Set the servo's starting position to 0 degrees.
+  myServo.write(0);
+}
+
+// Read the sensor and update the servo repeatedly.
+void loop() {
+  // Combine 30 sensing cycles into one touch reading.
+  long touchValue = touchSensor.capacitiveSensor(30);
+
+  // Label the reading in the Serial Monitor.
+  Serial.print("Touch: ");
+
+  // Print the reading so I can check the threshold.
+  Serial.println(touchValue);
+
+  // Treat readings above the threshold as a touch.
+  if (touchValue &gt; touchThreshold) {
+    // Turn the servo a quarter turn when the coin is touched.
+    myServo.write(90);
+  }
+  // Handle readings at or below the threshold.
+  else {
+    // Return the servo to its starting position.
+    myServo.write(0);
+  }
+
+  // Wait 50 milliseconds before taking another reading.
+  delay(50);
+}</code></pre>
+    </section>
+
+    <section>
+      <h2>Additional Questions</h2>
+
+      <h3>1. What is the voltage at Pin 9 over time?</h3>
+      <figure>
+        <img src="a4_q1_servo_waveform.png"
+             alt="Theoretical Pin 9 waveform at 0, 90, and 180 degrees, with wider high pulses at larger commanded angles.">
+        <figcaption>
+          This theoretical graph shows three 100 ms excerpts from the
+          sweep in Question 1. Pin 9 sends a pulse about every 20 ms,
+          while the code updates the target angle by 1° every 100 ms.
+          With the
+          <a href="https://github.com/arduino-libraries/Servo/blob/master/src/Servo.h">
+            default Arduino Servo settings
+          </a>,
+          the pulse stays near 5 V for about 0.54 ms at 0°, 1.47 ms at
+          90°, and 2.40 ms at 180°. The signal stays near 0 V between
+          pulses.
+        </figcaption>
+      </figure>
+
+      <h3>2. How can I handle a sensor reading that is wrong 1% of the time?</h3>
+      <p>
+        I would take three readings close together and use the median.
+        For example, if the readings are 50, 900, and 52, sorting them
+        gives 50, 52, and 900. The middle value is 52, so the isolated
+        spike has little effect on the result.
+      </p>
+      <pre><code>readings = []
+
+repeat 3 times:
+    readings.append(readSensor())
+
+sort readings from lowest to highest
+return readings[1]  // Index 1 is the middle value.</code></pre>
+
+      <h3>3. How can I reduce random measurement noise of ±10%?</h3>
+      <p>
+        I would average ten readings collected over a short time. If the
+        true input stays roughly stable, readings above and below it can
+        partly cancel each other out. For example, readings of 90, 103,
+        and 107 average to 100.
+      </p>
+      <pre><code>total = 0
+
+repeat 10 times:
+    total = total + readSensor()
+
+return total / 10.0  // Divide by the number of readings.</code></pre>
+
+<h3>4. Did I use AI tools?</h3>
+
+<p>
+  Yes. I used ChatGPT to clarify a few concepts while working on this
+  assignment. I drew the final waveform and circuit schematic myself,
+  and I wrote my own answer to Question 2.
+</p>
+
+<ul>
+  <li>
+    <strong>Servo waveform:</strong> I asked where the 0.54 ms pulse
+    width came from and how to show it on the graph. ChatGPT explained
+    how the Servo library maps angles to pulse widths and showed me
+    how those widths fit on the time axis. I used that explanation to
+    draw my own graph.
+  </li>
+  <li>
+    <strong>Question 2:</strong> I asked how taking the median helps
+    when a sensor occasionally gives a wrong reading. ChatGPT walked
+    me through an example with three readings. After I understood why
+    the middle value is less affected by an extreme reading, I wrote
+    my own answer.
+  </li>
+  <li>
+    <strong>Circuit schematic:</strong> I asked how to draw the wire
+    from the coin. ChatGPT explained that the coin uses a single wire
+    to the Pin 4 junction, where it connects to one end of the
+    resistor. I drew that connection in my schematic.
+  </li>
+</ul>
+
+<p>
+  The waveform explanation helped me separate the time the signal
+  stays high from the time the servo takes to move. That made it
+  easier to decide how wide to draw each pulse.
+</p>
+    </section>
+  </main>
+</body>
+</html>
+
+
