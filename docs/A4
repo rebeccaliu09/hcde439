@@ -76,7 +76,7 @@
     <section>
       <h2>Circuit Operation</h2>
       <figure>
-        <img src="a4_demo.gif"
+        <img src="a4_demo.mov"
              alt="The servo turns when the coin is touched and returns when released.">
         <figcaption>
           Touching the coin moves the servo to 90°. Releasing the coin
