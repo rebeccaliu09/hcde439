@@ -58,60 +58,59 @@
     switches the current through the strip.
   </p>
 
-  <h2>Schematic</h2>
-  <figure>
-    <img
-      src="A5-LED-strip-schematic.png"
-      alt="Schematic of an Arduino touch sensor and MOSFET-controlled LED strip"
-    >
-    <figcaption>
-      <p>
-        <strong>Load and power supply.</strong>
-        The LED strip's positive lead connects to the external supply
-        (<strong>TODO: actual supply voltage</strong>). Its negative lead connects
-        to the MOSFET drain (pin 2). The source (pin 3) connects to ground.
-        The Arduino and the external supply share a ground, so the gate voltage
-        from D9 and the source voltage use the same 0 V reference.
-      </p>
-      <p>
-        <strong>330 Ω gate resistor.</strong>
-        The MOSFET gate behaves like a small capacitor. The resistor limits the
-        brief current when D9 charges the gate. With an ideal 5 V output and an
-        initially discharged gate, the estimated initial current is
-        5 V ÷ 330 Ω ≈ 15 mA, below the Arduino Uno's 20 mA per-pin rating.
-        <a href="https://content.arduino.cc/assets/Pinout-UNOrev3_latest.pdf">Arduino Uno R3 pinout</a>
-      </p>
-      <p>
-        <strong>10 kΩ pull-down resistor.</strong>
-        The pull-down keeps the gate near 0 V while the Arduino resets and D9
-        is floating. When D9 is HIGH, the steady current through the two
-        resistors is approximately 5 V ÷ (330 Ω + 10 kΩ) = 0.48 mA.
-        The gate voltage is approximately 5 V × 10 kΩ ÷ (330 Ω + 10 kΩ)
-        = 4.84 V. The IRLZ44N datasheet specifies an on-resistance at a
-        4.5 V gate drive.
-        <a href="https://www.infineon.com/part/IRLZ44N">IRLZ44N datasheet</a>
-      </p>
-      <p>
-        <strong>Expected voltages and currents.</strong>
-        The source stays at 0 V. With the MOSFET on, the gate is approximately
-        4.84 V and the drain is close to 0 V. With the MOSFET off, the gate is
-        near 0 V and the drain is expected to rise toward the strip's supply
-        voltage. At full brightness, the strip and MOSFET carry the same load
-        current, approximately <strong>TODO: strip current in A</strong>
-        (<strong>TODO: measured or estimated from the strip specifications</strong>).
-        That is <strong>TODO: calculated percentage</strong> of the datasheet's
-        47 A absolute maximum, calculated as (strip current ÷ 47 A) × 100%.
-        The 47 A figure applies at a 25 °C case temperature with a 10 V
-        gate-to-source voltage.
-      </p>
-      <p>
-        <strong>Touch sensor.</strong>
-        A 1 MΩ resistor connects D2 (send) to D4 (receive). The coin connects to
-        D4. The resistor slows charging enough for the CapacitiveSensor library
-        to detect the change in capacitance when a finger touches the coin.
-      </p>
-    </figcaption>
-  </figure>
+<h2>Schematic</h2>
+<figure>
+  <img
+    src="A5-LED-strip-schematic.png"
+    alt="Schematic of an Arduino touch sensor and MOSFET-controlled LED strip"
+  >
+  <figcaption>
+    <p>
+      <strong>Load and power supply.</strong>
+      The LED strip's positive lead connects to the external 12 V DC supply.
+      Its negative lead connects to the MOSFET drain (pin 2). The source
+      (pin 3) connects to ground. The Arduino and the external supply share
+      a ground, so the gate voltage from D9 and the source voltage use the
+      same 0 V reference.
+    </p>
+    <p>
+      <strong>330 Ω gate resistor.</strong>
+      The MOSFET gate behaves like a small capacitor. The resistor limits the
+      brief current when D9 charges the gate. With an ideal 5 V output and an
+      initially discharged gate, the estimated initial current is
+      5 V ÷ 330 Ω ≈ 15 mA, below the Arduino Uno's 20 mA per-pin rating.
+      <a href="https://content.arduino.cc/assets/Pinout-UNOrev3_latest.pdf">Arduino Uno R3 pinout</a>
+    </p>
+    <p>
+      <strong>10 kΩ pull-down resistor.</strong>
+      The pull-down keeps the gate near 0 V while the Arduino resets and D9
+      is floating. When D9 is HIGH, the steady current through the two
+      resistors is approximately 5 V ÷ (330 Ω + 10 kΩ) = 0.48 mA.
+      The gate voltage is approximately 5 V × 10 kΩ ÷ (330 Ω + 10 kΩ)
+      = 4.84 V. The IRLZ44N datasheet specifies an on-resistance at a
+      4.5 V gate drive.
+      <a href="https://www.infineon.com/part/IRLZ44N">IRLZ44N datasheet</a>
+    </p>
+    <p>
+      <strong>Expected voltages and currents.</strong>
+      The source stays at 0 V. With the MOSFET on, the gate is approximately
+      4.84 V and the drain is close to 0 V. With the MOSFET off, the gate is
+      near 0 V and the drain is expected to rise toward the 12 V supply voltage.
+      At full brightness, the strip and MOSFET carry the same load current.
+      Based on the strip's rated power, the expected current is
+      16 W ÷ 12 V ≈ 1.33 A. This is approximately 2.8% of the IRLZ44N's
+      47 A absolute maximum continuous drain current
+      (1.33 A ÷ 47 A × 100%). The 47 A rating applies at a case temperature
+      of 25 °C and a gate-to-source voltage of 10 V.
+    </p>
+    <p>
+      <strong>Touch sensor.</strong>
+      A 1 MΩ resistor connects D2 (send) to D4 (receive). The coin connects to
+      D4. The resistor slows charging enough for the CapacitiveSensor library
+      to detect the change in capacitance when a finger touches the coin.
+    </p>
+  </figcaption>
+</figure>
 
   <h2>Circuit</h2>
   <figure>
