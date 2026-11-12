@@ -1,1 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HCDE 439 A5 - Rebecca Liu</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 820px;
+      margin: 40px auto;
+      padding: 0 20px;
+      line-height: 1.6;
+      color: #222;
+    }
+
+    figure {
+      margin: 20px 0;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+    }
+
+    pre {
+      background: #f4f4f4;
+      padding: 16px;
+      overflow-x: auto;
+      font-size: 14px;
+    }
+
+    h2 {
+      margin-top: 48px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 4px;
+    }
+
+    figcaption {
+      font-size: 15px;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>A5: High(er) voltage and transistors!</h1>
+  <p>Rebecca Liu, HCDE 439, Autumn 2026</p>
+
+  <p>
+    I built a touch-activated lamp with an LED strip powered by an external DC
+    supply. The strip starts at a dim standby level. Touching the coin electrode
+    fades it up to full brightness, holds it there for three seconds, and fades it
+    back down. The Arduino sends a PWM signal to an N-channel MOSFET, which
+    switches the current through the strip.
+  </p>
+
+  <h2>Schematic</h2>
+  <figure>
+    <img
+      src="A5-LED-strip-schematic.png"
+      alt="Schematic of an Arduino touch sensor and MOSFET-controlled LED strip"
+    >
+    <figcaption>
+      <p>
+        <strong>Load and power supply.</strong>
+        The LED strip's positive lead connects to the external supply
+        (<strong>TODO: actual supply voltage</strong>). Its negative lead connects
+        to the MOSFET drain (pin 2). The source (pin 3) connects to ground.
+        The Arduino and the external supply share a ground, so the gate voltage
+        from D9 and the source voltage use the same 0 V reference.
+      </p>
+      <p>
+        <strong>330 Ω gate resistor.</strong>
+        The MOSFET gate behaves like a small capacitor. The resistor limits the
+        brief current when D9 charges the gate. With an ideal 5 V output and an
+        initially discharged gate, the estimated initial current is
+        5 V ÷ 330 Ω ≈ 15 mA, below the Arduino Uno's 20 mA per-pin rating.
+        <a href="https://content.arduino.cc/assets/Pinout-UNOrev3_latest.pdf">Arduino Uno R3 pinout</a>
+      </p>
+      <p>
+        <strong>10 kΩ pull-down resistor.</strong>
+        The pull-down keeps the gate near 0 V while the Arduino resets and D9
+        is floating. When D9 is HIGH, the steady current through the two
+        resistors is approximately 5 V ÷ (330 Ω + 10 kΩ) = 0.48 mA.
+        The gate voltage is approximately 5 V × 10 kΩ ÷ (330 Ω + 10 kΩ)
+        = 4.84 V. The IRLZ44N datasheet specifies an on-resistance at a
+        4.5 V gate drive.
+        <a href="https://www.infineon.com/part/IRLZ44N">IRLZ44N datasheet</a>
+      </p>
+      <p>
+        <strong>Expected voltages and currents.</strong>
+        The source stays at 0 V. With the MOSFET on, the gate is approximately
+        4.84 V and the drain is close to 0 V. With the MOSFET off, the gate is
+        near 0 V and the drain is expected to rise toward the strip's supply
+        voltage. At full brightness, the strip and MOSFET carry the same load
+        current, approximately <strong>TODO: strip current in A</strong>
+        (<strong>TODO: measured or estimated from the strip specifications</strong>).
+        That is <strong>TODO: calculated percentage</strong> of the datasheet's
+        47 A absolute maximum, calculated as (strip current ÷ 47 A) × 100%.
+        The 47 A figure applies at a 25 °C case temperature with a 10 V
+        gate-to-source voltage.
+      </p>
+      <p>
+        <strong>Touch sensor.</strong>
+        A 1 MΩ resistor connects D2 (send) to D4 (receive). The coin connects to
+        D4. The resistor slows charging enough for the CapacitiveSensor library
+        to detect the change in capacitance when a finger touches the coin.
+      </p>
+    </figcaption>
+  </figure>
+
+  <h2>Circuit</h2>
+  <figure>
+    <img
+      src="circuit.jpg"
+      alt="Breadboard circuit with an Arduino Uno, a MOSFET, and a coin touch electrode"
+    >
+    <figcaption>
+      D9 connects to the MOSFET gate through 330 Ω. The 10 kΩ pull-down connects
+      the gate to the ground rail. The LED strip's negative lead connects to the
+      drain, and the source shares a ground rail with the Arduino GND and the
+      external supply's negative lead. A 1 MΩ resistor bridges D2 and D4, and the
+      coin electrode connects to D4.
+    </figcaption>
+  </figure>
+
+  <h2>Code</h2>
+  <p>
+    The sketch prints the touch readings to the Serial Monitor and triggers
+    the fade when a reading exceeds the threshold. With the pad untouched, the
+    readings were <strong>TODO: untouched range</strong>. With the pad touched,
+    the readings were <strong>TODO: touched range</strong>.
+  </p>
+
+  <!-- TODO: Set touchThreshold to the value used in your final test. -->
+  <pre><code>#include &lt;CapacitiveSensor.h&gt;
+
+// D2 sends the signal. D4 receives it and connects to the coin electrode.
+CapacitiveSensor touchPad(2, 4);
+
+const int gatePin = 9;
+const long touchThreshold = 1000;
+const int idleLevel = 20;
+const int fullLevel = 255;
+const int fadeStepDelayMs = 8;
+const int holdTimeMs = 3000;
+
+void setup() {
+  pinMode(gatePin, OUTPUT);
+  Serial.begin(9600);
+  analogWrite(gatePin, idleLevel);
+}
+
+void loop() {
+  long reading = touchPad.capacitiveSensor(30);
+  Serial.println(reading);
+
+  if (reading &gt; touchThreshold) {
+    // Increase the PWM duty cycle to fade up.
+    for (int level = idleLevel; level &lt;= fullLevel; level++) {
+      analogWrite(gatePin, level);
+      delay(fadeStepDelayMs);
+    }
+
+    delay(holdTimeMs);
+
+    // Decrease the PWM duty cycle to return to standby.
+    for (int level = fullLevel; level &gt;= idleLevel; level--) {
+      analogWrite(gatePin, level);
+      delay(fadeStepDelayMs);
+    }
+  }
+
+  delay(50);
+}</code></pre>
+
+  <h2>Circuit operation</h2>
+  <figure>
+    <img
+      src="demo.gif"
+      alt="The LED strip fades up after a touch, holds at full brightness, and fades back down"
+    >
+    <figcaption>
+      Touching the coin fades the strip from dim standby to full brightness.
+      The strip holds at full brightness for three seconds and then returns
+      to standby.
+    </figcaption>
+  </figure>
+
+  <h2>Additional questions</h2>
+
+  <h3>1. Maximum current between pins 2 and 3</h3>
+  <p>
+    For the IRLZ44N shown in my schematic, pin 2 is the drain and pin 3 is
+    the source. The datasheet's Absolute Maximum Ratings table lists a
+    continuous drain current of 47 A at a case temperature of 25 °C and
+    33 A at a case temperature of 100 °C, both with a gate-to-source voltage
+    of 10 V.
+    <a href="https://www.infineon.com/part/IRLZ44N">IRLZ44N datasheet</a>
+  </p>
+
+  <h3>2. Arduino, one DC motor, flyback diode, and capacitors</h3>
+  <figure>
+    <img
+      src="A5-Q2-single-motor.png"
+      alt="One DC motor switched by an IRLZ44N with a flyback diode and supply bypass capacitors"
+    >
+    <figcaption>
+      D9 drives the MOSFET gate through 330 Ω, with a 10 kΩ pull-down from gate
+      to ground. The motor connects between the external 6 V supply and the
+      drain. The flyback diode connects across the motor with its cathode
+      (striped end) toward the 6 V supply. When the MOSFET switches off,
+      current continues to flow through the diode and motor, limiting the
+      voltage spike at the drain. The 100 µF capacitor helps limit supply
+      voltage dips, and the 100 nF capacitor bypasses faster switching noise.
+      Both capacitors connect between the motor supply and ground.
+    </figcaption>
+  </figure>
+
+  <ul>
+    <li>Microcontroller board — <a href="https://content.arduino.cc/assets/Pinout-UNOrev3_latest.pdf">Arduino Uno R3</a></li>
+    <li>MOSFET — <a href="https://www.infineon.com/part/IRLZ44N">Infineon IRLZ44N</a></li>
+    <li>Flyback diode — <a href="https://www.vishay.com/docs/88525/1n5817.pdf">Vishay 1N5819 Schottky diode</a></li>
+    <li>DC motor — <a href="https://www.pololu.com/file/0J1487/pololu-micro-metal-gearmotors_rev-5-1.pdf">Pololu #993, 6 V</a></li>
+    <li>Bulk capacitor — <a href="https://na.industrial.panasonic.com/products/capacitors/aluminum-electrolytic-capacitors/series/83367/model/83681">Panasonic EEUFR1E101, 100 µF, 25 V</a></li>
+    <li>Bypass capacitor — <a href="https://www.digikey.com/en/products/detail/kemet/C320C104K5R5TA/818040">KEMET C320C104K5R5TA, 100 nF, 50 V</a></li>
+  </ul>
+
+  <h3>3. Arduino, L293D, and two DC motors</h3>
+  <figure>
+    <img
+      src="A5-Q3-dual-motor.png"
+      alt="Arduino Uno and L293D driving two DC motors through separate output pairs"
+    >
+    <figcaption>
+      Arduino 5 V powers the L293D logic at pin 16 (VCC1). The external 6 V
+      supply powers the motors through pin 8 (VCC2). Pins 4, 5, 12, and 13
+      connect to common ground. Motor A connects between pins 3 and 6
+      (1Y and 2Y), and Motor B connects between pins 11 and 14 (3Y and 4Y).
+      Each supply has a 100 nF bypass capacitor to ground.
+      <a href="https://www.ti.com/product/L293D">L293D datasheet</a>
+    </figcaption>
+  </figure>
+
+  <pre><code>// Motor A: enable = D6, input 1 = D2, input 2 = D3
+// Motor B: enable = D9, input 3 = D4, input 4 = D5
+
+speed = 255
+
+function setDirection(inputA, inputB, direction):
+    if direction is FORWARD:
+        digitalWrite(inputA, HIGH)
+        digitalWrite(inputB, LOW)
+    else:
+        digitalWrite(inputA, LOW)
+        digitalWrite(inputB, HIGH)
+
+function runPair(directionA, directionB):
+    analogWrite(D6, 0)
+    analogWrite(D9, 0)
+
+    setDirection(D2, D3, directionA)
+    setDirection(D4, D5, directionB)
+
+    analogWrite(D6, speed)
+    analogWrite(D9, speed)
+    wait 2 seconds
+
+setup:
+    configure D2, D3, D4, D5, D6, and D9 as outputs
+
+loop:
+    runPair(FORWARD, FORWARD)
+    runPair(BACK, BACK)
+    runPair(FORWARD, BACK)
+    runPair(BACK, FORWARD)</code></pre>
+
+  <h3>4. AI use</h3>
+  <p>
+
+  </p>
+  <p>
+    Shared AI conversations:
+
+  </p>
+
+</body>
+</html>
 
