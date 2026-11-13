@@ -91,7 +91,6 @@
       <a href="https://www.infineon.com/part/IRLZ44N">IRLZ44N datasheet</a>
     </p>
     <p>
-      <p>
   <strong>Expected voltages and currents.</strong>
   The source stays at 0 V. With the MOSFET on, the gate is approximately
   4.84 V and the drain is close to 0 V. With the MOSFET off, the gate is
@@ -139,8 +138,8 @@
   </p>
   <pre><code>
   // Load the capacitive touch library.
-#include <CapacitiveSensor.h>
-
+#include &lt;CapacitiveSensor.h&gt;
+    
 // Use D2 to send the signal and D4 to read the coin electrode.
 CapacitiveSensor coinSensor(2, 4);
 
@@ -196,18 +195,16 @@ void loop()
 
 </code></pre>
 
-  <h2>Circuit operation</h2>
-  <figure>
-    <img
-      src="demo.mov"
-      alt="The LED strip fades up after a touch, holds at full brightness, and fades back down"
-    >
-    <figcaption>
-      Touching the coin fades the strip from dim standby to full brightness.
-      The strip holds at full brightness for three seconds and then returns
-      to standby.
-    </figcaption>
-  </figure>
+<h2>Circuit operation</h2>
+<figure>
+  <img
+    src="demo.mov"
+    alt="The LED strip turns on when the coin is touched and off when it is released"
+  >
+  <figcaption>
+    Touching the coin turns on the LED strip. Releasing the coin turns it off.
+  </figcaption>
+</figure>
 
   <h2>Additional questions</h2>
 
