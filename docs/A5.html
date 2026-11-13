@@ -51,11 +51,10 @@
   <p>Rebecca Liu, HCDE 439, Autumn 2026</p>
 
   <p>
-    I built a touch-activated lamp with an LED strip powered by an external DC
-    supply. The strip starts at a dim standby level. Touching the coin electrode
-    fades it up to full brightness, holds it there for three seconds, and fades it
-    back down. The Arduino sends a PWM signal to an N-channel MOSFET, which
-    switches the current through the strip.
+  I built a touch-activated lamp with an LED strip powered by an external DC
+  supply. Touching the coin electrode turns the strip on, and releasing it
+  turns the strip off. The Arduino sends a PWM signal to an N-channel
+  MOSFET, which switches the current through the strip.
   </p>
 
 <h2>Schematic</h2>
@@ -92,17 +91,20 @@
       <a href="https://www.infineon.com/part/IRLZ44N">IRLZ44N datasheet</a>
     </p>
     <p>
-      <strong>Expected voltages and currents.</strong>
-      The source stays at 0 V. With the MOSFET on, the gate is approximately
-      4.84 V and the drain is close to 0 V. With the MOSFET off, the gate is
-      near 0 V and the drain is expected to rise toward the 12 V supply voltage.
-      At full brightness, the strip and MOSFET carry the same load current.
-      Based on the strip's rated power, the expected current is
-      16 W ÷ 12 V ≈ 1.33 A. This is approximately 2.8% of the IRLZ44N's
-      47 A absolute maximum continuous drain current
-      (1.33 A ÷ 47 A × 100%). The 47 A rating applies at a case temperature
-      of 25 °C and a gate-to-source voltage of 10 V.
-    </p>
+      <p>
+  <strong>Expected voltages and currents.</strong>
+  The source stays at 0 V. With the MOSFET on, the gate is approximately
+  4.84 V and the drain is close to 0 V. With the MOSFET off, the gate is
+  near 0 V and the drain is expected to rise toward the 12 V supply voltage.
+  During each on pulse, the strip and MOSFET carry the same current.
+  If the installed strip segment is rated at 16 W total, its estimated
+  on-state current is 16 W ÷ 12 V ≈ 1.33 A. The actual segment power and
+  current are unverified. Using the adapter's 2 A rating as a design case
+  and the IRLZ44N's listed maximum on-resistance of 0.035 Ω at a 4.5 V
+  gate drive, the estimated voltage drop is 2 A × 0.035 Ω = 0.07 V.
+  The estimated continuous on-state conduction loss is
+  (2 A)² × 0.035 Ω = 0.14 W.
+</p>
     <p>
       <strong>Touch sensor.</strong>
       A 1 MΩ resistor connects D2 (send) to D4 (receive). The coin connects to
@@ -129,10 +131,11 @@
 
   <h2>Code</h2>
   <p>
-    The sketch prints the touch readings to the Serial Monitor and triggers
-    the fade when a reading exceeds the threshold. With the pad untouched, the
-    readings were <strong>TODO: untouched range</strong>. With the pad touched,
-    the readings were <strong>TODO: touched range</strong>.
+    The sketch prints the capacitive touch reading and the PWM value to the
+    Serial Monitor. In one test, readings settled between 0 and 9 after I
+    released the coin. Example touch readings included 273, 828, and 5,180.
+    The threshold is 100. Readings above it set the PWM value to 220 out of
+    255, or about 86% duty cycle. Other readings set it to 0.
   </p>
   <pre><code>
   // Load the capacitive touch library.
