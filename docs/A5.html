@@ -197,10 +197,10 @@ void loop()
 
 <h2>Circuit operation</h2>
 <figure>
-  <img
-    src="demo_A5.mov"
-    alt="The LED strip turns on when the coin is touched and off when it is released"
-  >
+  <video controls muted playsinline style="max-width:100%; border:1px solid #ccc;">
+    <source src="demo_A5.mov" type="video/mp4">
+    The LED strip turns on when the coin is touched and off when it is released.
+  </video>
   <figcaption>
     Touching the coin turns on the LED strip. Releasing the coin turns it off.
   </figcaption>
@@ -302,6 +302,15 @@ loop:
     I asked my TA for help, and they replaced my Arduino Uno. Looking back, I would test with 
     a second board earlier to narrow down whether the problem was with the board or the circuit.
 
+  I also used Claude to figure out why my demo video would not show up on
+  the page. I had originally planned to upload a GIF, but the file was too
+  big, so I switched to demo_A5.mov and forgot to change the &lt;img&gt; tag
+  I had written for the GIF. Claude pointed out that &lt;img&gt; only
+  displays images and that I needed a &lt;video&gt; tag instead. I replaced
+  the tag and the video played. Next time I will update the HTML element
+  whenever I change the file type.
+</p>
+    
   </p>
 
 </body>
