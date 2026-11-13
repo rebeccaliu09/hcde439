@@ -135,47 +135,62 @@
     the readings were <strong>TODO: touched range</strong>.
   </p>
 
-  <!-- TODO: Set touchThreshold to the value used in your final test. -->
-  <pre><code>#include &lt;CapacitiveSensor.h&gt;
+// Load the capacitive touch library.
+#include <CapacitiveSensor.h>
 
-// D2 sends the signal. D4 receives it and connects to the coin electrode.
-CapacitiveSensor touchPad(2, 4);
+// Use D2 to send the signal and D4 to read the coin electrode.
+CapacitiveSensor coinSensor(2, 4);
 
-const int gatePin = 9;
-const long touchThreshold = 1000;
-const int idleLevel = 20;
-const int fullLevel = 255;
-const int fadeStepDelayMs = 8;
-const int holdTimeMs = 3000;
+// Use PWM pin D9 to drive the MOSFET gate through the 330-ohm resistor.
+const int ledStripPin = 9;
 
-void setup() {
-  pinMode(gatePin, OUTPUT);
+// Set an initial threshold to calibrate using the Serial Monitor.
+const long touchThreshold = 100;
+
+// Set the LED strip to about 86% PWM duty cycle while touched.
+const int touchedBrightness = 220;
+
+// Initialize the output and serial connection.
+void setup()
+{
+  // Set the output latch LOW before enabling the output.
+  digitalWrite(ledStripPin, LOW);
+
+  // Set D9 as an output that starts LOW, keeping the strip off.
+  pinMode(ledStripPin, OUTPUT);
+
+  // Open the serial connection for calibration and testing.
   Serial.begin(9600);
-  analogWrite(gatePin, idleLevel);
 }
 
-void loop() {
-  long reading = touchPad.capacitiveSensor(30);
-  Serial.println(reading);
+// Read the coin sensor and update the LED strip.
+void loop()
+{
+  // Measure capacitive touch using 30 samples.
+  long touchReading = coinSensor.capacitiveSensor(30);
 
-  if (reading &gt; touchThreshold) {
-    // Increase the PWM duty cycle to fade up.
-    for (int level = idleLevel; level &lt;= fullLevel; level++) {
-      analogWrite(gatePin, level);
-      delay(fadeStepDelayMs);
-    }
+  // Use 220 for a reading above the threshold and 0 otherwise.
+  int brightness = touchReading > touchThreshold ? touchedBrightness : 0;
 
-    delay(holdTimeMs);
+  // Send the selected PWM value to the MOSFET gate.
+  analogWrite(ledStripPin, brightness);
 
-    // Decrease the PWM duty cycle to return to standby.
-    for (int level = fullLevel; level &gt;= idleLevel; level--) {
-      analogWrite(gatePin, level);
-      delay(fadeStepDelayMs);
-    }
-  }
+  // Print a label for the touch reading.
+  Serial.print("Touch: ");
 
+  // Print the current touch reading.
+  Serial.print(touchReading);
+
+  // Print a label for the commanded PWM value.
+  Serial.print("  PWM: ");
+
+  // Print the PWM value and finish the line.
+  Serial.println(brightness);
+
+  // Space out the readings to keep the monitor readable.
   delay(50);
-}</code></pre>
+}
+</code></pre>
 
   <h2>Circuit operation</h2>
   <figure>
